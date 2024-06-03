@@ -1,0 +1,336 @@
+---
+title: "sml_2"
+author: "MARK_MULWANA"
+date: '2024-01-20'
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise 2
+### 1.
+
+```{r}
+# Defining Parameters
+mu_0 <- c(-2, -1)
+mu_1 <- c(0, 1)
+Sigma <- matrix(c(1, -3/4, -3/4, 2), nrow = 2, ncol = 2, byrow = TRUE)
+
+# Function for class conditional density
+class_density <- function(x, mu, Sigma) {
+  Constant <- 1 / sqrt((2 * pi)^2 * det(Sigma))
+  Exponential <- -0.5 * t(x - mu) %*% solve(Sigma) %*% (x - mu)
+  return(Constant * exp(Exponential))
+}
+
+# Probability density for each class
+Pr_0 <- function(x) class_density(x, mu_0, Sigma)
+Pr_1 <- function(x) class_density(x, mu_1, Sigma)
+
+# Grid for contour plot
+x_1 <- seq(-5, 5, length.out = 100)
+x_2 <- seq(-5, 5, length.out = 100)
+grid <- expand.grid(x_1 = x_1, x_2 = x_2)
+
+# Probability densities for each class at each point in the grid
+Pr_y0 <- apply(grid, 1, function(x) Pr_0(x))
+Pr_y1 <- apply(grid, 1, function(x) Pr_1(x))
+
+# Decision boundary contour
+Decision_Boundary_Contour <- matrix(Pr_y0 / Pr_y1, nrow = length(x_1))
+
+# Contour Plots for each class
+contour(x_1, x_2, matrix(Pr_y0, nrow = length(x_1)), main = "Class 0 Contours", xlab = "X1", ylab = "X2", col = "black")
+contour(x_1, x_2, matrix(Pr_y1, nrow = length(x_1)), main = "Class 1 Contours", xlab = "X1", ylab = "X2", col = "green", add = TRUE)
+
+# Decision Boundary Contour
+contour(x_1, x_2, Decision_Boundary_Contour, levels = 1, col = "red", add = TRUE)
+
+# Add legend
+legend("topright", legend = c("Class 0", "Class 1", "Decision Boundary"), col = c("black", "green", "red"), lty = 1, cex = 0.8)
+
+```
+
+
+##Exercise 3
+## Part 1
+
+```{r}
+accent_raw_data_1 <- read.csv("accent-raw-data-1.csv")
+dim(accent_raw_data_1)
+
+```
+##Comment on the peculiarities of the dataset from a point of view dimensionality.
+
+The data set has got 329 rows and 39681 columns , and each column corresponds to a feature, therefore there are 39681 features in total, and 329 observations, so this implies that;
+
+The dataset is relatively small in terms of the number of observations.
+
+The dataset is high-dimensional with a large number of variables.
+
+High-dimensional datasets may present challenges in terms of visualization, analysis, and model training, especially if the number of variables significantly exceeds the number of observations.
+
+
+##Part 2  Plots for 6 speakers
+```{r}
+xy <- accent_raw_data_1
+x <- as.matrix(xy[,-1])
+y <- xy[,1]
+
+par(mfrow=c(3,2))
+speaker_1 = x[ c(9),]
+as.numeric(speaker_1)
+ts.plot(speaker_1)
+
+speaker_2 = x[ c(45),]
+as.numeric(speaker_2)
+ts.plot(speaker_2)
+
+speaker_3 = x[ c(81),]
+as.numeric(speaker_3)
+ts.plot(speaker_3)
+
+speaker_4 = x[ c(99),]
+as.numeric(speaker_4)
+ts.plot(speaker_4)
+
+speaker_5 = x[ c(126),]
+as.numeric(speaker_5)
+ts.plot(speaker_5)
+
+speaker_6 = x[ c(234),]
+as.numeric(speaker_6)
+ts.plot(speaker_6)
+```
+## Part 3: Comments on the features of the plotted sound trucks
+
+##About Amplitude and Intensity
+
+From the graphs plotted, they show a significant variation in loudness for each sound truck over time, this is due to a change of their amplitudes as time moves, for example when you consider speakers 3,4 and 5, at time between 0 and 10000 seconds, the sound is low compared to that of speaker 1,2 and 6  but still they all keep changing.
+
+##About Frequency Patterns
+
+Still from the graphs plotted, for each sound truck, there exists a frequency that dominates and also different sound trucks have different frequency characteristics.
+
+##About Temporary Patterns
+
+From the plots, from time 0 to around 10000 seconds, there are like 3 (speaker 3, 4 and 5) sound trucks that show some consistency in patterns, but other 3 are not, so generally consistency in patterns for each sound truck is low.
+
+Note: I have not got a chance to play the audios due to that am not using a personal computer, but the observations above are from the graphs plotted.
+
+
+## Part 4:  Comment on the use of Classification Trees as learning machines for classifying the speaking accent using this data.
+
+This is going to involve both advantages and disadvantages of using Trees for classifying the speaking accent, lets start with the advantages:
+
+#Advantages:
+
+Trees are capable of capturing non-linear relationships between the features and the response variable and this is an important aspect when dealing with complex patterns and incosistency of patterns in the different sound trucks, hence easy way to classify speaking accents.
+
+Trees are interpretable, making it easy to understand the decision making process, because each node represents a decision based on a specific feature, so this can help in providing a crucial understanding of accent classification.
+
+Trees have the ability to perform implicity feature selection by choosing the most features for splitting, and due to that the data given has got large number of features of 39681, trees may be of help with this type of data.
+
+#Disadvantages:
+
+Due to the high dimension of the data set given, with trees there is a high risk of over fitting.
+
+Trees are computationally complex most especially on data set with a large number of features, like the one given, building and traversing such trees lead to a longer training times which may be practically impossible for high dimensional data set, so it may be a hinderance in accent classification.
+
+Due to chances of overfitting, trees need to be prunned in order to control the size of the tree and overcome overfitting, but determining the optimal level of prunning is challenging.
+
+
+##Part 5: Comment on the use of kNearest Neighbors as learning machines for classifying the speaking accent using this data.
+
+We are going to talk about both advantages and disadvantages of using kNN for accent classification using the data given
+
+#Advantages:
+
+kNN is non-parametric algorithm, which means that it can handle non-linear realationships between features and accent classes.
+
+kNN donot need assumptions about data distribution, this means it can easily be used for various data sets.
+
+kNN easily adapt to local patterns in the data, so this is very important in capturing diverse accent variations and due to the fact that from the graphs, we saw incosistent patterns.
+
+kNN are easily implemented and donot require a training phase, so making it easy and reducing on time to classify accents.
+
+#Disadvantages:
+
+Due to that the data is high dimensional, this can lead to increased computational cost and reduced effectiveness of kNN.
+
+kNN require computing of distances between data points and because our data is high dimensional, this is computationally intensive and may result in slow prediction times, hence difficulty in accent classification.
+
+### PART 2.
+```{r}
+#1. Generate separate confusion matrices for each of the three methods
+# Assuming you have loaded the necessary libraries
+library(class)
+library(MASS)
+library(kernlab)
+library(mlbench)
+library(reshape2)
+library(ROCR)
+library(ggplot2)
+library(ipred)
+library(survival)
+library(rchallenge)
+library(PerformanceAnalytics)
+library(knitr)
+library(acepack)
+library(caret)
+library(HSAUR2)
+library(corrplot)
+library(rpart)
+library(rpart.plot)
+library(corrplot)
+library(xtable)
+library(play)
+
+
+# Load the dataset
+# Load the dataset
+
+mffc_data <- read.csv('accent-mfcc-data-1.csv')
+
+
+```
+##Part 2
+##Part 1
+```{r}
+mffc_data$language <- as.factor(ifelse(mffc_data$language=="US",1,0))
+data = mffc_data
+
+
+
+r = data[,-1]
+t = data[, 1]
+
+#For kNN
+kNN_d = knn(r , r, t , k= 5)
+confmatr_kNN = table(t , kNN_d)
+confmatr_kNN
+
+##Note, k=5 gives a good machine according to me, this is because it gives a smaller error in predictions
+
+#For SVM
+SVM_d = ksvm(t ~., data = r, kernel = 'rbfdot', type='C-svc', prob.model=TRUE)
+SVM_pred = predict(SVM_d, r)
+confmatr_SVM = table(t , SVM_pred)
+confmatr_SVM
+
+
+#For Tree
+Tree_d = rpart(t ~ ., data = r)
+Tree_pred = predict(Tree_d,r,type='class')
+confmatr_tree= table(t , Tree_pred)
+confmatr_tree
+
+```
+
+##Part 2
+```{r}
+r = data[,-1]
+t = data[, 1]
+
+
+#kNN
+k = 2
+m_kNN = knn(r, r, t, k=k, prob = TRUE)
+prob_k = attr(m_kNN, "prob")
+prob_k = 2*ifelse(m_kNN == "0", 1-prob_k, prob_k) - 1
+pred_kNN = prediction(prob_k, data[,1])
+perf_kNN = performance(pred_kNN, measure='tpr', x.measure='fpr')
+
+
+#Tree
+
+tree_f = rpart(t ~ ., data = r, method = "class")
+prob_T <- predict(tree_f, data[,-1], type='prob')[,2]
+Tree_prediction <- prediction(prob_T, data[,1])
+Tree_performance <- performance(Tree_prediction, measure='tpr', x.measure='fpr')
+
+#SVM
+
+svm_f <- ksvm(t ~., data = r, kernel = 'rbfdot', type='C-svc', prob.model=TRUE)
+prob_s     <- predict(svm_f, data[,-1], type='probabilities')[,2]
+svm_prediction <- prediction(prob_s, data[,1])
+svm_performance <- performance(svm_prediction, measure='tpr', x.measure='fpr')
+
+
+#Plots for  comparative ROC curves
+par(mfrow=c(1,1))
+plot(perf_kNN, col=2, lwd= 2, lty=1, main=paste('Plot Comperative of  ROC curves'))
+plot(Tree_performance, col=3, lwd= 2, lty=1, add=TRUE)
+plot(svm_performance, col=4, lwd= 2, lty=1, add=TRUE)
+abline(a=0,b=1)
+legend('bottomright', inset=0.05, c('kNN', 'Tree', 'SVM'),col=2:5, lty=1)
+```
+##Part 3
+```{r}
+set.seed(123)
+n = length(data[,1])
+epsi_2 = 0.6
+tr_set = 0.6 # 60% Training set
+te_set = 1 - tr_set # 40% Test set
+
+Re = 100     #Number of replications
+test_error <- matrix(0, nrow = Re, ncol = 3)
+
+for(r in 1:Re)
+{
+  # index training and test sets
+  ind_t<- sample(sample(c(rep(TRUE, round(n * tr_set)), rep(FALSE, round(n * te_set)))))
+  w <- data[,-1]
+  z <- data[,1]
+  
+  # kNN
+  y_hat_kNN <- knn(w[ind_t,], w[!ind_t,],z[ind_t], k=1, prob=TRUE)
+  ind_error_te <- ifelse(z[!ind_t]!=y_hat_kNN,1,0)
+  test_error[r,1] <- mean(ind_error_te)
+  
+  # Tree
+  Tree_model <- rpart(language ~ ., data = data[ind_t,], method = "class")
+  y_hat_tree <- predict(Tree_model, w[!ind_t, ], type='class')
+  ind_err_te<- ifelse(z[!ind_t]!=y_hat_tree,1,0)
+  test_error[r,2]  <- mean(ind_err_te)
+  
+  # SVM
+  svm_model <- ksvm(language~., data=data[ind_t, ], kernel='rbfdot', type='C-svc', prob.model=TRUE)
+  y_te_hat <- predict(svm_model, w[!ind_t, ], type='response')
+  ind_error_tes     <- ifelse(z[!ind_t]!=y_te_hat ,1,0)
+  test_error[r,3]  <- mean(ind_error_tes)
+}
+testing <- data.frame(test_error)
+colnames(testing) <- c('kNN', 'Tree', 'SVM')
+boxplot(testing, col=c("green","yellow","red"),main= "plot of Comparative boxplots ",xlab='Learning machine',ylab='Risk of test')
+
+```
+##Part 4: Comment on the predictive performances.
+
+## kNN
+From the box plot for kNN it is narrow which indicates consistence and stability performance across the different test sets, and it has no outliers meaning no variability in predictive performance.
+
+On average the model is working well due to that, from its boxplot, the median is low.
+
+## Trees
+
+From the box plot for Trees its box plot is abit wide compared to others for kNN and SVM, this implies that its consistance in performance is low compared to the other 2 machines and it has got an outlier which implies variability in the predictive outcomes.
+
+## SVM
+
+For this the box plot is small meaning the machine is very stable and consistent across different test sets.
+
+Having a low median indicates that SVM on average its performing more well compared to  Tree machine, and it has not got outliers meaning there is no variability in predictive out comes.
+
+
+
+
+
+
+
+
