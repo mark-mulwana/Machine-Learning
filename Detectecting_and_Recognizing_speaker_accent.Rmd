@@ -12,8 +12,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Exercise 2
-### 1.
 
 ```{r}
 # Defining Parameters
@@ -57,7 +55,6 @@ legend("topright", legend = c("Class 0", "Class 1", "Decision Boundary"), col = 
 ```
 
 
-##Exercise 3
 ## Part 1
 
 ```{r}
@@ -192,7 +189,6 @@ library(xtable)
 library(play)
 
 
-# Load the dataset
 # Load the dataset
 
 mffc_data <- read.csv('accent-mfcc-data-1.csv')
